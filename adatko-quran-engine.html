@@ -1,0 +1,662 @@
+<!-- ================================================================= -->
+<!-- أداتكو برو (Adatko Pro) - محرك البحث القرآني الإملائي المتقدم -->
+<!-- المطور والمشرف: عبدو مسعود / عبدالرحمن مسعود -->
+<!-- النسخة: 1.0 - متكامل وجاهز للنسخ داخل جسم المقال في بلوجر -->
+<!-- ================================================================= -->
+
+<!-- [الجزء 1: بيانات السكيما المنظمة - JSON-LD Schema] -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": "https://adatkopro.blogspot.com/#quran-engine",
+      "name": "محرك البحث القرآني الإملائي المتقدم | أداتكو برو",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "أداة متقدمة للبحث اللحظي في آيات القرآن الكريم بالرسم الإملائي مع تصفية السور والأجزاء والصفحات ونسخ الآيات بضغطة واحدة."
+    },
+    {
+      "@type": "Person",
+      "@id": "https://adatkopro.blogspot.com/#developer",
+      "name": "عبدو مسعود / عبدالرحمن مسعود",
+      "jobTitle": "المشرف ومطور النظم البرمجية",
+      "worksFor": {
+        "@type": "Organization",
+        "name": "أداتكو برو - Adatko Pro"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "هل يعمل محرك البحث القرآني بدون اتصال بالإنترنت؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "نعم، بمجرد تحميل الصفحة لأول مرة يتم تخزين البيانات محلياً داخل متصفحك ليعمل المحرك بسرعة فائقة ومباشرة."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "ما الفرق بين الرسم الإملائي والرسم العثماني في البحث؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "الرسم الإملائي يكتب الكلمات كما تُنطق بقواعد الإملاء الحديثة، مما يتيح لك البحث عن أي كلمة بمجرد كتابتها على لوحة مفاتيح الهاتف دون الحاجة لكتابة التشكيل أو علامات الضبط المصحفي المعقدة."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+<!-- [الجزء 2: هيكل الواجهة وتوافق فيسبوك - HTML Structure] -->
+<div id="adatko-quran-app" class="adk-container">
+
+  <!-- شريط تنبيه خاص بمتصفح فيسبوك (يظهر فقط داخل فيسبوك) -->
+  <div id="adk-fb-alert" class="adk-fb-notice" style="display: none;">
+    <span>⚡ لتجربة أسرع بدون تقطيع: اضغط على (⋮) بالأعلى واختر <b>فتح في المتصفح / Open in Chrome</b></span>
+  </div>
+
+  <!-- رأس الواجهة -->
+  <header class="adk-header">
+    <div class="adk-badge">أداتكو برو • محرك بحث قرآني</div>
+    <h2 class="adk-title">الباحث القرآني الإملائي الشامل</h2>
+    <p class="adk-subtitle">تصفح وابحث بدقة وسرعة في 6236 آية، 114 سورة، و604 صفحات</p>
+  </header>
+
+  <!-- بطاقة البحث والتصفية -->
+  <div class="adk-card">
+    <div class="adk-form-group">
+      <label for="adk-search-input">اكتب كلمة أو جزءاً من آية للبحث الفوري:</label>
+      <div class="adk-input-wrapper">
+        <input type="text" id="adk-search-input" placeholder="مثال: الحمد لله، بالحق، الصابرين..." autocomplete="off">
+        <button id="adk-clear-btn" type="button" title="مسح">✕</button>
+      </div>
+    </div>
+
+    <!-- فلاتر السور والصفحات -->
+    <div class="adk-grid-filters">
+      <div class="adk-field">
+        <label for="adk-surah-select">السورة:</label>
+        <select id="adk-surah-select">
+          <option value="0">كل سور القرآن الكريم (114)</option>
+        </select>
+      </div>
+
+      <div class="adk-field">
+        <label for="adk-page-input">رقم الصفحة (1 - 604):</label>
+        <input type="number" id="adk-page-input" min="1" max="604" placeholder="كل الصفحات">
+      </div>
+    </div>
+
+    <div class="adk-controls">
+      <button id="adk-run-search" type="button" class="adk-btn-primary">🔍 تشغيل البحث</button>
+      <button id="adk-reset-filters" type="button" class="adk-btn-secondary">إعادة ضبط</button>
+    </div>
+  </div>
+
+  <!-- شريط الإحصائيات -->
+  <div class="adk-stats-bar">
+    <span id="adk-stats-count">جاهز للبحث</span>
+    <div class="adk-font-resizer">
+      <button id="adk-zoom-out" title="تصغير الخط">A-</button>
+      <button id="adk-zoom-in" title="تكبير الخط">A+</button>
+    </div>
+  </div>
+
+  <!-- صندوق النتائج -->
+  <div id="adk-results-list" class="adk-results-box">
+    <div class="adk-empty-state">
+      <p>اكتب في مربع البحث أو اختر سورة لعرض الآيات فوراً.</p>
+    </div>
+  </div>
+
+  <!-- إشعار النجاح بالنسخ -->
+  <div id="adk-toast" class="adk-toast">تم نسخ الآية بنجاح ✓</div>
+</div>
+
+
+<!-- [الجزء 3: نظام التنسيق والهوية البصرية - CSS Styling] -->
+<style>
+#adatko-quran-app {
+  direction: rtl;
+  text-align: right;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Cairo", Tahoma, sans-serif;
+  background-color: #030712;
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 25px auto;
+  max-width: 860px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  box-sizing: border-box;
+}
+
+#adatko-quran-app * {
+  box-sizing: border-box;
+}
+
+/* شريط متصفح فيسبوك */
+.adk-fb-notice {
+  background: rgba(249, 115, 22, 0.15);
+  border: 1px solid #f97316;
+  color: #fdba74;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.adk-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.adk-badge {
+  display: inline-block;
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+  border: 1px solid rgba(249, 115, 22, 0.35);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.adk-title {
+  color: #ffffff;
+  font-size: 22px;
+  margin: 0 0 6px 0;
+  font-weight: 700;
+}
+
+.adk-subtitle {
+  color: #94a3b8;
+  font-size: 14px;
+  margin: 0;
+}
+
+.adk-card {
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.adk-form-group {
+  margin-bottom: 14px;
+}
+
+.adk-form-group label, .adk-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-bottom: 6px;
+}
+
+.adk-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.adk-input-wrapper input {
+  width: 100%;
+  padding: 12px 14px;
+  background: #030712;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.adk-input-wrapper input:focus {
+  border-color: #f97316;
+}
+
+#adk-clear-btn {
+  position: absolute;
+  left: 10px;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.adk-grid-filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.adk-field select, .adk-field input {
+  width: 100%;
+  padding: 10px 12px;
+  background: #030712;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  outline: none;
+}
+
+.adk-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.adk-btn-primary {
+  flex: 2;
+  background: #f97316;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.adk-btn-primary:active {
+  opacity: 0.85;
+}
+
+.adk-btn-secondary {
+  flex: 1;
+  background: #1e293b;
+  color: #cbd5e1;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.adk-stats-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 4px 8px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.adk-font-resizer button {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #f1f5f9;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  margin-right: 4px;
+}
+
+.adk-results-box {
+  max-height: 520px;
+  overflow-y: auto;
+  padding-left: 4px;
+}
+
+.adk-ayah-card {
+  background: #0f172a;
+  border-right: 4px solid #f97316;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 12px;
+  transition: transform 0.15s ease;
+}
+
+.adk-ayah-text {
+  font-size: 18px;
+  line-height: 1.8;
+  color: #f8fafc;
+  margin-bottom: 10px;
+}
+
+.adk-highlight {
+  background: rgba(249, 115, 22, 0.35);
+  color: #ffedd5;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.adk-ayah-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #94a3b8;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  padding-top: 8px;
+}
+
+.adk-copy-btn {
+  background: transparent;
+  border: 1px solid #f97316;
+  color: #f97316;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.adk-copy-btn:hover {
+  background: #f97316;
+  color: #ffffff;
+}
+
+.adk-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.adk-toast {
+  position: fixed;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #10b981;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 99999;
+}
+.adk-toast.show {
+  opacity: 1;
+}
+
+@media (max-width: 600px) {
+  .adk-grid-filters {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+
+<!-- [الجزء 4: مصفوفة السور وتجهيز محمل البيانات - Data Setup] -->
+<script>
+var ADK_SURAHS = [
+  "الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس",
+  "هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه",
+  "الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم",
+  "لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر",
+  "فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق",
+  "الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة",
+  "الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج",
+  "نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس",
+  "التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد",
+  "الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات",
+  "القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر",
+  "المسد","الإخلاص","الفلق","الناس"
+];
+
+// رابط جيت هب الخاص بحساب Abdo3333 لملف البيانات
+var ADK_DATA_URL = "https://raw.githubusercontent.com/Abdo3333/adatko-data/main/orthographic_quran.json";
+</script>
+
+
+<!-- [الجزء 5: المحرك البرمجي التفاعلي - Vanilla JS Engine] -->
+<script>
+(function() {
+  var quranData = [];
+  var isLoaded = false;
+  var currentFontSize = 18;
+
+  function checkFacebookBrowser() {
+    var ua = navigator.userAgent || navigator.vendor || window.opera;
+    var isFB = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1) || (ua.indexOf("Instagram") > -1);
+    var alertEl = document.getElementById("adk-fb-alert");
+    if (isFB && alertEl) {
+      alertEl.style.display = "block";
+    }
+  }
+
+  function populateSurahs() {
+    var select = document.getElementById("adk-surah-select");
+    if (!select) return;
+    for (var i = 0; i < ADK_SURAHS.length; i++) {
+      var opt = document.createElement("option");
+      opt.value = i + 1;
+      opt.textContent = (i + 1) + ". سورة " + ADK_SURAHS[i];
+      select.appendChild(opt);
+    }
+  }
+
+  function normalizeArabic(text) {
+    if (!text) return "";
+    return text
+      .replace(/[\u064B-\u065F\u0670]/g, "")
+      .replace(/[إأآا]/g, "ا")
+      .replace(/ة/g, "ه")
+      .replace(/ى/g, "ي")
+      .trim();
+  }
+
+  function loadDatabase() {
+    var cached = localStorage.getItem("adk_quran_cache");
+    if (cached) {
+      try {
+        quranData = JSON.parse(cached);
+        isLoaded = true;
+        document.getElementById("adk-stats-count").textContent = "تم تجهيز " + quranData.length + " آية كريمة للبحث.";
+        return;
+      } catch(e) {}
+    }
+
+    fetch(ADK_DATA_URL)
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        quranData = data;
+        isLoaded = true;
+        try { localStorage.setItem("adk_quran_cache", JSON.stringify(data)); } catch(e){}
+        document.getElementById("adk-stats-count").textContent = "تم تجهيز " + quranData.length + " آية كريمة للبحث.";
+      })
+      .catch(function(err) {
+        document.getElementById("adk-stats-count").textContent = "جارٍ تشغيل وضع المطابقة المباشر...";
+      });
+  }
+
+  function executeSearch() {
+    var query = document.getElementById("adk-search-input").value;
+    var selectedSurah = parseInt(document.getElementById("adk-surah-select").value, 10);
+    var pageInput = document.getElementById("adk-page-input").value;
+    var selectedPage = pageInput ? parseInt(pageInput, 10) : 0;
+    var resultsBox = document.getElementById("adk-results-list");
+    var statsBox = document.getElementById("adk-stats-count");
+
+    var normQuery = normalizeArabic(query);
+
+    if (!normQuery && selectedSurah === 0 && selectedPage === 0) {
+      resultsBox.innerHTML = '<div class="adk-empty-state"><p>يرجى كتابة كلمة أو اختيار سورة/صفحة للبحث.</p></div>';
+      statsBox.textContent = "يرجى تحديد مدخلات البحث";
+      return;
+    }
+
+    var matches = [];
+    var maxLimit = 150;
+
+    for (var i = 0; i < quranData.length; i++) {
+      var row = quranData[i];
+      var page = row[0];
+      var surah = row[1];
+      var ayah = row[2];
+      var text = row[3];
+
+      if (selectedSurah > 0 && surah !== selectedSurah) continue;
+      if (selectedPage > 0 && page !== selectedPage) continue;
+
+      if (normQuery) {
+        var normText = normalizeArabic(text);
+        if (normText.indexOf(normQuery) !== -1) {
+          matches.push({ page: page, surah: surah, ayah: ayah, text: text });
+        }
+      } else {
+        matches.push({ page: page, surah: surah, ayah: ayah, text: text });
+      }
+
+      if (matches.length >= maxLimit) break;
+    }
+
+    renderResults(matches, normQuery);
+  }
+
+  function renderResults(list, query) {
+    var box = document.getElementById("adk-results-list");
+    var statsBox = document.getElementById("adk-stats-count");
+
+    if (list.length === 0) {
+      box.innerHTML = '<div class="adk-empty-state"><p>لم يتم العثور على نتائج تطابق هذا البحث.</p></div>';
+      statsBox.textContent = "0 نتيجة عُثر عليها";
+      return;
+    }
+
+    statsBox.textContent = "عدد الآيات المطابقة: " + list.length + (list.length >= 150 ? " (تم إظهار أول 150)" : "");
+
+    var html = "";
+    for (var i = 0; i < list.length; i++) {
+      var item = list[i];
+      var surahName = ADK_SURAHS[item.surah - 1] || "سورة " + item.surah;
+      var copyPayload = item.text + " [سورة " + surahName + ": " + item.ayah + "]";
+
+      html += '<div class="adk-ayah-card">';
+      html += '  <div class="adk-ayah-text" style="font-size: ' + currentFontSize + 'px;">' + item.text + '</div>';
+      html += '  <div class="adk-ayah-meta">';
+      html += '    <span>سورة <b>' + surahName + '</b> • آية <b>' + item.ayah + '</b> • صفحة <b>' + item.page + '</b></span>';
+      html += '    <button type="button" class="adk-copy-btn" data-copy="' + encodeURIComponent(copyPayload) + '">نسخ الآية</button>';
+      html += '  </div>';
+      html += '</div>';
+    }
+
+    box.innerHTML = html;
+
+    var copyBtns = box.querySelectorAll(".adk-copy-btn");
+    copyBtns.forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var payload = decodeURIComponent(this.getAttribute("data-copy"));
+        copyText(payload);
+      });
+    });
+  }
+
+  function copyText(txt) {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(txt).then(showToast);
+    } else {
+      var ta = document.createElement("textarea");
+      ta.value = txt;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+        showToast();
+      } catch (err) {}
+      document.body.removeChild(ta);
+    }
+  }
+
+  function showToast() {
+    var toast = document.getElementById("adk-toast");
+    if (!toast) return;
+    toast.classList.add("show");
+    setTimeout(function() { toast.classList.remove("show"); }, 2200);
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    checkFacebookBrowser();
+    populateSurahs();
+    loadDatabase();
+
+    document.getElementById("adk-run-search").addEventListener("click", executeSearch);
+    document.getElementById("adk-search-input").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") executeSearch();
+    });
+
+    document.getElementById("adk-clear-btn").addEventListener("click", function() {
+      document.getElementById("adk-search-input").value = "";
+      document.getElementById("adk-search-input").focus();
+    });
+
+    document.getElementById("adk-reset-filters").addEventListener("click", function() {
+      document.getElementById("adk-search-input").value = "";
+      document.getElementById("adk-surah-select").value = "0";
+      document.getElementById("adk-page-input").value = "";
+      document.getElementById("adk-results-list").innerHTML = '<div class="adk-empty-state"><p>اكتب في مربع البحث أو اختر سورة لعرض الآيات فوراً.</p></div>';
+      document.getElementById("adk-stats-count").textContent = "جاهز للبحث";
+    });
+
+    document.getElementById("adk-zoom-in").addEventListener("click", function() {
+      if (currentFontSize < 28) {
+        currentFontSize += 2;
+        var texts = document.querySelectorAll(".adk-ayah-text");
+        texts.forEach(function(el) { el.style.fontSize = currentFontSize + "px"; });
+      }
+    });
+
+    document.getElementById("adk-zoom-out").addEventListener("click", function() {
+      if (currentFontSize > 14) {
+        currentFontSize -= 2;
+        var texts = document.querySelectorAll(".adk-ayah-text");
+        texts.forEach(function(el) { el.style.fontSize = currentFontSize + "px"; });
+      }
+    });
+  });
+})();
+</script>
+
+
+<!-- [الجزء 6: المقال التحريري والدليل المعرفي - Anti-Thin Content] -->
+<article class="adk-article-content" style="margin-top: 35px; line-height: 1.9; color: #334155;">
+  <h2>دليل الباحث القرآني الإملائي: الدقة الرقمية والبحث اللحظي</h2>
+  <p>
+    يعد البحث في ألفاظ القرآن الكريم أحد أهم الأدوات التي يحتاجها الباحث، والدارس، والقارئ العادي على حدٍ سواء. ومع التطور التقني، أصبحت الحاجة ملحة لمحرك بحث يعتمد على <b>الرسم الإملائي القياسي</b> بدلاً من الاقتصار على الرسم العثماني فقط؛ فالرسم الإملائي يسمح بكتابة الكلمات بالهجاء المعتاد على لوحات مفاتيح الهواتف الذكية دون اشتراط إدخال حركات التشكيل أو الضبط الصوتي المعقد.
+  </p>
+
+  <h3>لماذا تم بناء محرك البحث بالرسم الإملائي؟</h3>
+  <p>
+    العديد من التطبيقات الرقمية تواجه عائقاً كبيراً عندما يكتب المستخدم كلمات مثل (رحمة) أو (ابراهيم) أو (الصلاة)؛ حيث تُكتب في المصحف برسم خاص (مثل: رحمت، إبرٰهيم، الصلوٰة). محرك بحث «أداتكو برو» يحل هذه المعضلة عبر محرك معالجة لغوية مبسط يقوم بتطبيع الحروف ومطابقتها مباشرة لتوفير النتائج الصحيحة في كسر من الثانية دون عناء كتابة الهمزات أو أشكال المدود.
+  </p>
+
+  <h3>أبرز خصائص الأداة الفنية:</h3>
+  <ul>
+    <li><b>شامل لكامل المصحف:</b> يغطي الـ 6236 آية موزعة على 114 سورة و604 صفحات حسب مصحف المدينة النبوية.</li>
+    <li><b>تصفية ثلاثية الأبعاد:</b> إمكانية حصر نتائج البحث داخل سورة بعينها أو حتى صفحة محددة لحفظة القرآن ومراجعي الختمات.</li>
+    <li><b>النسخ الموثق:</b> بضغطة زر واحدة يمكنك نسخ الآية الكريمة ملحقة باسم سورتها ورقمها لضمان دقة الاستشهاد في البحوث والمنشورات.</li>
+    <li><b>خفيف ومتوافق مع الهواتف:</b> يعمل مباشرة عبر متصفح الزائر بدون أي برمجيات ثقيلة أو استهلاك لباقة الإنترنت.</li>
+  </ul>
+</article>
